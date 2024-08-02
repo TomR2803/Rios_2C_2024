@@ -36,6 +36,13 @@ void app_main(void){
         printf("LED OFF\n");
         LedOff(LED_1);
         vTaskDelay(CONFIG_BLINK_PERIOD / portTICK_PERIOD_MS);
+
+        printf("LED ON\n");
+        LedOn(LED_2);
+        vTaskDelay(CONFIG_BLINK_PERIOD / portTICK_PERIOD_MS);
+        printf("LED OFF\n");
+        LedOff(LED_2);
+        vTaskDelay(CONFIG_BLINK_PERIOD / portTICK_PERIOD_MS);
     }
 }
 /*==================[end of file]============================================*/
