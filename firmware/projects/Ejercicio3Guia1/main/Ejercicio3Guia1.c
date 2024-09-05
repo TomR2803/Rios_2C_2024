@@ -127,9 +127,9 @@ void app_main(void){
 	led2.periodo = 0;
 
 	led3.mode = TOGGLE;
-	led3.n_ciclos = 30;
+	led3.n_ciclos = 50;
 	led3.n_led = 3;
-	led3.periodo = 400;
+	led3.periodo = 1000;
 
 	ModosLED(&led3);
 	ModosLED(&led1);
