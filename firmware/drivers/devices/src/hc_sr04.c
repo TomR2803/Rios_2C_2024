@@ -10,7 +10,7 @@
  */
 
 /*==================[inclusions]=============================================*/
-#include "hc_sr04.h"
+#include "C:\Repositorios\Rios_2C_2024\firmware\drivers\devices\inc\hc_sr04.h"
 #include "delay_mcu.h"
 /*==================[macros and definitions]=================================*/
 #define MAX_US		17700	/* maximun distance time in us (300cm or 118inch) */

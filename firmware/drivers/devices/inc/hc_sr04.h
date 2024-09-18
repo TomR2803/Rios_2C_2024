@@ -46,7 +46,7 @@
 /**
  * @brief HC_SR04 initialization.
  * 
- * @param echo GPIO number wher echo pin is connected
+ * @param echo GPIO number where echo pin is connected
  * @param trigger GPIO number wher trigger pin is connected
  * @return true 
  */
