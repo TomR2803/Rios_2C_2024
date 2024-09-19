@@ -133,7 +133,7 @@ static void MostrarTask(void *pvParameter);
 
 /*==================[external functions definition]==========================*/
 static void MedirTask(void  *pvParameter){
-
+ printf("Medir\n");
 	while (true)
 	{
 		if(global_on)
@@ -144,6 +144,7 @@ static void MedirTask(void  *pvParameter){
 }
 
 static void MostrarTask(void *pvParameter){
+	 printf("Mostrar\n");
     while(true){
 		//Checkeo si la  tarea de medición está activa
 		if(global_on == true)
@@ -186,6 +187,7 @@ static void MostrarTask(void *pvParameter){
 }
 
 static void TaskTeclas(void *pvParameter){
+	 printf("teclas\n");
     while(true){
 
 		uint8_t switches = SwitchesRead();
@@ -213,13 +215,15 @@ static void TaskTeclas(void *pvParameter){
  *  mostrarla por medio de la pantalla y los LEDs y leer las teclas.
  */
 void app_main(void){
-
+	// Inicializar el hardware
+	printf("Main\n");
 	LedsInit();
-	HcSr04Init(GPIO_3, GPIO_2);
+	HcSr04Init(3, 2);
 	LcdItsE0803Init();
 	SwitchesInit();
-	xTaskCreate(&MostrarTask, "MostrarTask", 2048, NULL, 5, &MostrarTask_task_handle);
-	xTaskCreate(&MedirTask, "MedirTask", 2048, NULL, 5, &MedirTask_task_handle);
+ 	//Crear las tareas
+	xTaskCreate(&MostrarTask, "MostrarTask", 2048, NULL, 4, &MostrarTask_task_handle);
+	xTaskCreate(&MedirTask, "MedirTask", 2048, NULL, 4, &MedirTask_task_handle);
     xTaskCreate(&TaskTeclas, "TaskTeclas",2048, NULL, 5, &TaskTeclas_task_handle);
 	
 	}
