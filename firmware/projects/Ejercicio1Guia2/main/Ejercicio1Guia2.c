@@ -215,7 +215,7 @@ static void TaskTeclas(void *pvParameter){
 void app_main(void){
 
 	LedsInit();
-	HcSr04Init(3, 2);
+	HcSr04Init(GPIO_3, GPIO_2);
 	LcdItsE0803Init();
 	SwitchesInit();
 	xTaskCreate(&MostrarTask, "MostrarTask", 2048, NULL, 5, &MostrarTask_task_handle);
