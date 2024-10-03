@@ -46,7 +46,7 @@
  * @def DELAY
  * @brief Tiempo de refresco de medición, encendido de LEDs y muestra en pantalla LCD en milisegundos.
  */
-#define TASK_DELAY 1000
+#define TASK_DELAY 1000000
 
 /**
  * @def SWITCHES_DELAY
@@ -62,7 +62,7 @@ uint16_t distancia=0;
 /**
  * @brief Variable booleana que indica si se realiza la medición y muestra de distancia.
  */
-bool global_on = false;
+bool global_on = true;
 
 /**
  * @brief Variable booleana que indica si se mantiene el último valor medido.
@@ -92,17 +92,7 @@ TaskHandle_t MedirTask_task_handle = NULL;
 TaskHandle_t MostrarTask_task_handle = NULL;
 
 /*==================[internal functions declaration]=========================*/
-/**
- * @fn static void TaskTeclas(void *pvParameter)
- * @brief Tarea encargada de leer el estado de los switches y cambiar las variables global_on y global_hold.
- * Las teclas están asignadas de la siguiente manera:
- * - TEC1: ON/OFF del dispositivo de medición.
- * - TEC2: Activa o desactiva el modo "hold", que dejá mostrando el ultimo valor medido en la pantalla.
- * 
- * @param pvParameter Parámetro de la tarea (no utilizado).
- * @return
- */
-static void TaskTeclas(void *pvParameter);
+
 
 /**
  * @fn static void MedirTask(void *pvParameter)
@@ -139,7 +129,7 @@ static void MostrarTask(void *pvParameter);
  * @brief Función invocada en la interrupción del timer A
  */
 void FuncTimerA(void* param){
-    vTaskNotifyGiveFromISR(MedirTask_task_handle, pdFALSE);    /* Envía una notificación a la tarea asociada al LED_1 */
+    vTaskNotifyGiveFromISR(MedirTask_task_handle, pdFALSE); /* Envía una notificación a la tarea asociada al LED_1 */
 }
 
 /**
@@ -148,20 +138,15 @@ void FuncTimerA(void* param){
 void FuncTimerB(void* param){
     vTaskNotifyGiveFromISR(MostrarTask_task_handle, pdFALSE);    /* Envía una notificación a la tarea asociada al LED_2 */
 }
-/**
- * @brief Función invocada en la interrupción del timer C
- */
-void FuncTimerC(void* param){
-    vTaskNotifyGiveFromISR(TaskTeclas_task_handle, pdFALSE);    /* Envía una notificación a la tarea asociada al LED_2 */
-}
 
 static void MedirTask(void  *pvParameter){
 
 	while (true)
-	{	
+	{	printf("medirTask\n");
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);  
-		if(global_on==true)
+		if(global_on==true){
 		distancia = HcSr04ReadDistanceInCentimeters();
+		}
 	}
 	
 }
@@ -170,7 +155,7 @@ static void MostrarTask(void *pvParameter){
     while(true){
 		//Checkeo si la  tarea de medición está activa
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);  
-
+		printf("mostrarTask\n");
 		if(global_on == true)
 		{
 			// Enciendo LEDs según la distancia
@@ -208,29 +193,15 @@ static void MostrarTask(void *pvParameter){
 		}
     }
 }
+void SWITCH_1_Func(){
 
-static void TaskTeclas(void *pvParameter){
-    while(true){
+	global_on=!global_on;
 
-		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);  
+}
+void SWITCH_2_Func(){
 
-		uint8_t switches = SwitchesRead();
-		switch(switches)
-		{
-			case SWITCH_1:
-				global_on = !global_on;
-			break;
-			
-			case SWITCH_2:
-				global_hold = !global_hold;
-			break;
-
-			case SWITCH_1 | SWITCH_2:
-				global_on =! global_on;
-				global_hold =! global_hold;
-			break;
-		}
-    }
+	global_hold=!global_hold;
+	
 }
 /*==================[external functions definition]==========================*/
 /**
@@ -240,40 +211,45 @@ static void TaskTeclas(void *pvParameter){
 void app_main(void){
 	//inicialización del hardware
 	LedsInit();
-	HcSr04Init(GPIO_3, GPIO_2);
+	HcSr04Init(3, 2);
 	LcdItsE0803Init();
+
+	printf("main\n");
 	SwitchesInit();
+	SwitchActivInt(SWITCH_1, SWITCH_1_Func, NULL);
+	SwitchActivInt(SWITCH_2, SWITCH_2_Func, NULL);
+
+
 	//inicialización de los timers
-	    timer_config_t timer_MedirTask = {
+	
+		timer_config_t timer_MedirTask = {
         .timer = TIMER_A,
         .period = TASK_DELAY,
         .func_p = FuncTimerA,
         .param_p = NULL
     };
 	TimerInit(&timer_MedirTask);
+
 		timer_config_t timer_MostrarTask = {
         .timer = TIMER_B,
         .period = TASK_DELAY,
         .func_p = FuncTimerB,
         .param_p = NULL
-    };
+		};
 	TimerInit(&timer_MostrarTask);
-		timer_config_t timer_TaskTeclas = {
-        .timer = TIMER_C,
-        .period = SWITCHES_DELAY,
-        .func_p = FuncTimerC,
-        .param_p = NULL
-    };
-	TimerInit(&timer_TaskTeclas);
+	printf("timer init\n");
 
 	//creación de tareas
 	xTaskCreate(&MostrarTask, "MostrarTask", 2048, NULL, 4, &MostrarTask_task_handle);
 	xTaskCreate(&MedirTask, "MedirTask", 2048, NULL, 4, &MedirTask_task_handle);
-    xTaskCreate(&TaskTeclas, "TaskTeclas",2048, NULL, 5, &TaskTeclas_task_handle);
+	printf("task create\n");
+
+
 	//inicialización del conteo de los timers
+	printf("timer start\n");
 	TimerStart(timer_MedirTask.timer);
 	TimerStart(timer_MostrarTask.timer);
-	TimerStart(timer_TaskTeclas.timer);
+
 	}
 
 /*=================[end of file]============================================*/
