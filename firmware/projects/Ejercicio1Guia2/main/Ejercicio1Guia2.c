@@ -14,14 +14,14 @@
  * |:--------------:|:--------------|
  * | 	ECHO	 	| 	GPIO_3		|
  * | 	TRIGGER	 	| 	GPIO_2		|
- * | 	 +5V	 	| 	 +5V		|
+ * | 	 +3,3V	 	| 	 +3,3V		|
  * | 	 GND	 	| 	 GND		|
  *
  * @section changelog Changelog
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 12/09/2023 | Document creation		                         |
+ * | 12/09/2024 | Document creation		                         |
  *
  * @author Tomás Rios(tomr2803@outlook.com)
  *
@@ -39,56 +39,71 @@
 #include "switch.h"
 
 /* ==================[macros and definitions]=================================*/
+
 /**
- * @def DELAY
+ * @def TASK_DELAY
  * @brief Tiempo de refresco de medición, encendido de LEDs y muestra en pantalla LCD en milisegundos.
  */
+
 #define TASK_DELAY 1000
 
 /**
  * @def SWITCHES_DELAY
  * @brief Tiempo de delay para el control de lectura de los switches en milisegundos.
  */
+
 #define SWITCHES_DELAY 100
 
 /**
+ *
  * @brief Distancia medida por el sensor en centímetros.
  */
+
 uint16_t distancia=0;
 
 /**
+ *
  * @brief Variable booleana que indica si se realiza la medición y muestra de distancia.
  */
+
 bool global_on = false;
 
 /**
+ * @def global_hold
  * @brief Variable booleana que indica si se mantiene el último valor medido.
  */
+
 bool global_hold = false;
+
 /*==================[internal data definition]===============================*/
+
 /**
- * @fn static void TaskTeclas(void *pvParameter)
- * @brief Función encargada de leer el estado de los switches y actualizar las variables on y hold.
+ * @fn TaskHandle_t TaskTeclas_task_handle
+ * @brief Handle de la función encargada de leer el estado de los switches y actualizar las variables on y hold.
  * @param pvParameter Parámetro de la tarea (no utilizado).
  */
+
 TaskHandle_t TaskTeclas_task_handle = NULL;
 
 /**
- * @fn static void MedirTask(void *pvParameter)
- * @brief Función encargada de, en caso de estar encendido el dispositivo, medir la distancia con el sensor.
+ * @fn TaskHandle_t MedirTask_task_handle
+ * @brief Handle de la función encargada de, en caso de estar encendido el dispositivo, medir la distancia con el sensor.
  * @param pvParameter Parámetro de la tarea (no utilizado).
  */
+
 TaskHandle_t MedirTask_task_handle = NULL;
 
 
 /**
- * @fn static void MostrarTask(void *pvParameter)
- * @brief Función que controla los LEDs y muestra el valor de la distancia medida en la pantalla LCD.
+ * @fn TaskHandle_t MostrarTask_task_handle
+ * @brief Handle de la función que controla los LEDs y muestra el valor de la distancia medida en la pantalla LCD.
  * @param pvParameter Parámetro de la tarea (no utilizado).
  */
+
 TaskHandle_t MostrarTask_task_handle = NULL;
 
 /*==================[internal functions declaration]=========================*/
+
 /**
  * @fn static void TaskTeclas(void *pvParameter)
  * @brief Tarea encargada de leer el estado de los switches y cambiar las variables global_on y global_hold.
@@ -99,6 +114,7 @@ TaskHandle_t MostrarTask_task_handle = NULL;
  * @param pvParameter Parámetro de la tarea (no utilizado).
  * @return
  */
+
 static void TaskTeclas(void *pvParameter);
 
 /**
@@ -111,10 +127,11 @@ static void TaskTeclas(void *pvParameter);
  * @param pvParameter Parámetro de la tarea (no utilizado).
  * @return
  */
+
 static void MedirTask(void *pvParameter);
 
 /**
- * @fn static void MostrarTask(void *pvParameter)
+ *
  * @brief Tarea encargada de controlar los LEDs y la pantalla LCD según la distancia medida.
  * 
  * Según la distancia medida en la tarea  MedirTask, se encienden los LED correspondientes:
@@ -129,6 +146,7 @@ static void MedirTask(void *pvParameter);
  * @param pvParameter Parámetro de la tarea (no utilizado).
  * @return
  */
+
 static void MostrarTask(void *pvParameter);
 
 /*==================[external functions definition]==========================*/
