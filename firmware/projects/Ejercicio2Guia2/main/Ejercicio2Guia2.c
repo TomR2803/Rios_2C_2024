@@ -15,14 +15,14 @@
  * |:--------------:|:--------------|
  * | 	ECHO	 	| 	GPIO_3		|
  * | 	TRIGGER	 	| 	GPIO_2		|
- * | 	 +5V	 	| 	 +5V		|
+* | 	 +3,3V	 	| 	 +3,3V		|
  * | 	 GND	 	| 	 GND		|
  *
  * @section changelog Changelog
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 12/09/2023 | Document creation		                         |
+ * | 23/09/2024 | Document creation		                         |
  *
  * @author Tomás Rios(tomr2803@outlook.com)
  *
