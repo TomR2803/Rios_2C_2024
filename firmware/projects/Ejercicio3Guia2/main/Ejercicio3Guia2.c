@@ -2,7 +2,7 @@
  *
  * @section genDesc General Description
  *
-* Este progrma, usado con la placa ESP32 y el  sensor HC-SR04, mide distancia y controla el encendido de los LEDS de la placa según la medición.
+* Este programa, usado con la placa ESP32 y el  sensor HC-SR04, mide distancia y controla el encendido de los LEDS de la placa según la medición.
  * Asimismo, se muestra la distancia medida en cm en una pantalla LCD y envía las mediciones por puerto serie para poder observarlos con
  * la extensión "Serial monitor". Se puede también controlar el encendido o apagado del dispositivo con la Tecla1 en la placa
  * o la tecla/letra "O" en el Serial Monitor; y controlar si se mantiene el último valor medido en la pantalla usando la Tecla2 o la tecla/letra "H" en
@@ -16,14 +16,14 @@
  * |:--------------:|:--------------|
  * | 	ECHO	 	| 	GPIO_3		|
  * | 	TRIGGER	 	| 	GPIO_2		|
- * | 	 +5V	 	| 	 +5V		|
+ * | 	 +3,3V	 	| 	 +3,3V		|
  * | 	 GND	 	| 	 GND		|
  *
  * @section changelog Changelog
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 12/09/2023 | Document creation		                         |
+ * | 4/10/2024 | Document creation		                         |
  *
  * @author Tomás Rios(tomr2803@outlook.com)
  *
@@ -71,12 +71,6 @@ bool global_on = true;
  */
 bool global_hold = false;
 /*==================[internal data definition]===============================*/
-/**
- * @fn static void TaskTeclas(void *pvParameter)
- * @brief Función encargada de leer el estado de los switches y actualizar las variables on y hold.
- * @param pvParameter Parámetro de la tarea (no utilizado).
- */
-TaskHandle_t TaskTeclas_task_handle = NULL;
 
 /**
  * @fn static void MedirTask(void *pvParameter)
