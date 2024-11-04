@@ -1,2 +1,2 @@
-idf_component_register(SRCS "Examen_eprog_Rios.c"
+idf_component_register(SRCS "Examen.c"
                     INCLUDE_DIRS "")
