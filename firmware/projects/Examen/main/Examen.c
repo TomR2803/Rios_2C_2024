@@ -159,8 +159,8 @@ static void MedirTask(void  *pvParameter){
 		distancia = HcSr04ReadDistanceInCentimeters();
 
 		//Luego de medir, se le envia la notificacion a la tarea mostrar
-
-		vTaskNotifyGiveFromISR(MostrarTask_task_handle, pdFALSE); 
+		xTaskNotifyGive(MostrarTask_task_handle);
+		//vTaskNotifyGiveFromISR(MostrarTask_task_handle, pdFALSE); //isr, solamente desde interrupciones
 	}
 	
 }
@@ -176,6 +176,7 @@ static void MostrarTask(void *pvParameter){
 				LedOn(LED_1);
 				LedOn(LED_2);
 				LedOn(LED_3);
+				UartSendString(UART_CONNECTOR,"Peligro, vehículo cerca");
 			}
 			else //entre 3 y 5 metros 
 				if (distancia >= 300 && distancia < 500){
@@ -189,13 +190,13 @@ static void MostrarTask(void *pvParameter){
 
 				}
 			else //mayor a 5 metros
-				if(distancia >= 30){
+				if(distancia >= 500){
 
 					LedOn(LED_1);
 					LedOff(LED_2);
 					LedOff(LED_3);
 					//envío el mensaje correspondiente a través de la UART
-					UartSendString(UART_CONNECTOR,"Peligro, vehículo cerca");
+					
 					UartSendString(UART_CONNECTOR,"\r");
 				}
     }
@@ -210,17 +211,17 @@ static void BuzzerControlTask(void *pvParameter){
 		//cada 500 ms (controlado con el delay de la tarea)
 		if(distancia<300){
 			GPIOOn(GPIO_20);
-			vTaskDelay(BUZZER_DELAY / portTICK_PERIOD_MS);
-			GPIOOff(GPIO_20);
 		}
 		
 		//si la distancia está entre 3 y 5 metros, el buzzer suena
 		//cada 1000 ms (controlado con el delay de la tarea)
 		else if(distancia >= 300 && distancia < 500){
 			GPIOOn(GPIO_20);
-			vTaskDelay(BUZZER_DELAY*2 / portTICK_PERIOD_MS);
-			GPIOOff(GPIO_20);
+			vTaskDelay(BUZZER_DELAY / portTICK_PERIOD_MS);
 		}
+		
+		vTaskDelay(BUZZER_DELAY / portTICK_PERIOD_MS);
+		GPIOOff(GPIO_20);
 
 	}
 }
@@ -237,8 +238,8 @@ static void ControlCaidaTask(void *pvParameter){
 		AnalogInputReadSingle(CH2,&valor3);
 
 		//paso los valores de mV a G
-		valor1=(valor1/(0.3*1000))-5.5;
-		valor2=(valor2/(0.3*1000))-5.5;
+		valor1=(valor1/1000 - 1.65)/0.3;
+		valor2=(valor2/1000 - 1.65)/0.3;
 		valor3=(valor3/(0.3*1000))-5.5;
 		
 		if(valor1+valor2+valor3>4){
@@ -338,4 +339,5 @@ void app_main(void){
 	printf("timer start\n");
 	TimerStart(timer_MedirTask.timer);
 	TimerStart(timer_ControlCaidaTask.timer);
+	}
 /*==================[end of file]============================================*/
