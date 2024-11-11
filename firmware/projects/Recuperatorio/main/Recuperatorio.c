@@ -15,7 +15,7 @@
  * | 	Galga1		| 	GPIO_0		|	
  * |	Galga2  	| 	GPIO_1		|
  * | 	ECHO	 	| 	GPIO_3		|
- * | 	TRIGGER	 	| 	GPIO_		|
+ * | 	TRIGGER	 	| 	GPIO_2		|
  * | 	Barrera	 	| 	GPIO_20		|
  * | 	 +3,3V	 	| 	 +3,3V		|
  * | 	GND	 	| 	GND		|
