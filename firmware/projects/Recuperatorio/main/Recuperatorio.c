@@ -54,20 +54,20 @@
 
 /**
  *
- * @brief Valor de las mediciones de peso de la galga 1
+ * @brief Valor de la suma de mediciones de peso de la galga 1
  */
 
 uint16_t PesoGalga1;
 
 /**
  *
- * @brief Valor de las mediciones de peso de la galga 2
+ * @brief Valor de la suma de mediciones de peso de la galga 2
  */
 
  uint16_t PesoGalga2;
 /**
  *
- * @brief Array con las mediciones de peso de la galga 2
+ * @brief Contador de las muestras tomadas del peso del vehiculo
  */
 
  uint16_t CounterMuestras=0;
@@ -77,9 +77,10 @@ uint16_t PesoGalga1;
 /**
  *
  * @brief Distancia medida por el sensor en centímetros.
+ * 
  */
 
-uint16_t distancia=1100;
+uint16_t distancia;
 
 /**
  *
@@ -103,7 +104,7 @@ uint16_t VelocidadMaxima=0;
 
 /**
  *
- * @brief Variable booleana que indica si se realiza la medición y muestra de distancia.
+ * @brief Variable booleana que indica si se realiza la medición del peso del vehiculo.
  */
 
 bool pesar = false;
@@ -118,29 +119,77 @@ bool pesar = false;
 TaskHandle_t MedirTask_task_handle = NULL;
 
 /**
- * @fn TaskHandle_t MostrarTask_task_handle
- * @brief Handle de la función que controla los LEDs y muestra el valor de la velocidad medida en la pantalla LCD.
+ * @fn TaskHandle_t MostrarPorLEDsTask_task_handle
+ * @brief Handle de la función que controla los LEDs según la velocidad del vehiculo
  * @param pvParameter Parámetro de la tarea (no utilizado).
  */
 
 TaskHandle_t MostrarPorLEDsTask_task_handle = NULL;
 /**
- * @fn TaskHandle_t MostrarTask_task_handle
- * @brief Handle de la función que controla los LEDs y muestra el valor de la velocidad medida en la pantalla LCD.
+ * @fn TaskHandle_t PesarTask_task_handle
+ * @brief Handle de la función que se encarga de calcular el valor del vehiculo y enviar los mensajes
+ * por la UART
  * @param pvParameter Parámetro de la tarea (no utilizado).
  */
 
 TaskHandle_t PesarTask_task_handle = NULL;
-/**
- * @fn TaskHandle_t ControlPorTeclado_task_handle
- * @brief Handle de la función que controla la apertura de la barrera por medio del teclado
- * @param pvParameter Parámetro de la tarea (no utilizado).
- */
 
-TaskHandle_t ControlPorTecladoTask_task_handle = NULL;
 /*==================[internal functions declaration]=========================*/
 
 /*==================[external functions definition]==========================*/
+/**
+ * @fn static void MedirTask(void *pvParameter)
+ * @brief Tarea encargada de medir la distancia por medio del sensor.
+ * 
+ * @param pvParameter Parámetro de la tarea (no utilizado).
+ * @return
+ */
+static void MedirTask(void *pvParameter);
+
+/**
+ * @fn static void MostrarTask(void *pvParameter)
+ * @brief Tarea encargada de controlar los LEDs y la pantalla LCD según la distancia medida.
+ * 
+ * Según la velocidad calculada en la tarea  MedirTask, se encienden los LED correspondientes:
+ * 
+ *velocidad mayor a 8m/s: LED3
+ *velocidad entre 0m/s y 8m/s: LED2
+ * vehículo detenido:LED1.
+ * 
+ * @param pvParameter Parámetro de la tarea (no utilizado).
+ * @return
+ */
+
+/**
+ * @fn void ControlPorTeclado()
+ * @brief Función que lée la letra  introducida por el usuario y abre o cierra la barrer
+ * (si la letra es o la abre y si es c la cierra)
+ * 
+ * @param NULL
+ * @return
+ */
+void ControlPorTeclado();
+/**
+ * @fn void SWITCH_1_Func()
+ * @brief Función que usa ControlPorTeclado Interrumpe la tarea que esté corriendo para ejecutarse
+ * cierra la barrera
+ * 
+ * @param NULL
+ * @return
+ */
+void SWITCH_1_Func();
+
+/**
+ * @fn void SWITCH_2_Func()
+ * @brief Función que usa ControlPorTeclado Interrumpe la tarea que esté corriendo para ejecutarse
+ * abre la barrera
+ * 
+ * @param NULL
+ * @return
+ */
+void SWITCH_2_Func();
+
+
 /**
  * @brief Función invocada en la interrupción del timer A
  */
@@ -196,6 +245,7 @@ static void MedirTask(void  *pvParameter){
 			pesar=false;
 			velocidad=0;
 			VelocidadMaxima=0;
+			
 		}
 		//Luego de medir, se le envia la notificacion a la tarea mostrarPorLEDsw
 		xTaskNotifyGive(MostrarPorLEDsTask_task_handle);
@@ -245,26 +295,35 @@ static void PesarTask(void *pvParameter){
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 		if(pesar){
 
-		AnalogInputReadSingle(CH0,&valor1);
-		AnalogInputReadSingle(CH1,&valor2);
-		PesoGalga1=PesoGalga1+(valor1*20000)/3.3;
-		PesoGalga2=PesoGalga2+(valor2*20000)/3.3;
-		
-		CounterMuestras=CounterMuestras+1;
-		//Cuando el contador de muestras llega a 50,
-		//calculo el peso del vehiculo con los valores de los
-		//promedios de las dos galgas y envío esto y la velocidad maxima
-		//por la UART 
-		if(CounterMuestras>=50){
-			PesoVehiculo=(PesoGalga1/50)+(PesoGalga2/50);
-			UartSendString(UART_PC,"Peso:");
-			UartSendString(UART_PC, (char *)UartItoa(PesoVehiculo, 10));
-			UartSendString(UART_PC,"\r");
-			UartSendString(UART_PC,"Velocidad máxima:");
-			UartSendString(UART_PC, (char *)UartItoa(VelocidadMaxima, 10));
-			UartSendString(UART_PC,"\r");
-		}
+			AnalogInputReadSingle(CH0,&valor1);
+			AnalogInputReadSingle(CH1,&valor2);
+			PesoGalga1=PesoGalga1+(valor1*20000)/3.3;
+			PesoGalga2=PesoGalga2+(valor2*20000)/3.3;
+			
+			CounterMuestras=CounterMuestras+1;
+			//Cuando el contador de muestras llega a 50,
+			//calculo el peso del vehiculo con los valores de los
+			//promedios de las dos galgas y envío esto y la velocidad maxima
+			//por la UART 
+			if(CounterMuestras>=50){
+				PesoVehiculo=(PesoGalga1/50)+(PesoGalga2/50);
+				PesoGalga2=0;
+				PesoGalga1=0;
+				CounterMuestras=0;
+				UartSendString(UART_PC,"Peso:");
+				UartSendString(UART_PC, (char *)UartItoa(PesoVehiculo, 10));
+				UartSendString(UART_PC,"\r");
+				UartSendString(UART_PC,"Velocidad máxima:");
+				UartSendString(UART_PC, (char *)UartItoa(VelocidadMaxima, 10));
+				UartSendString(UART_PC,"\r");
 
+			}
+
+		}
+		else{
+		PesoGalga2=0;
+		PesoGalga1=0;
+		CounterMuestras=0;
 		}
 
 
