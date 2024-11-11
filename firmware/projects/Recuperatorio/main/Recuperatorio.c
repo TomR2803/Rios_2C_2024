@@ -1,25 +1,33 @@
-/*! @mainpage Template
- *
+/*! @mainpage Recuperatorio examen individual Electronica programable
  * @section genDesc General Description
  *
- * This section describes how the program works.
  *
- * <a href="https://drive.google.com/...">Operation Example</a>
+ * Este programa, usado con la placa ESP32 y el  sensor HC-SR04, mide la distancia y calcula la velocidad de vehiculos que ingresan a un area para ser
+ * pesados. Se controla el encendido de los LEDS de la placa según la velocidad de estos, si se encuentran a menos de 10 metros del sensor.
+ * Asimismo, luego de que le vehiculo se detenga, dentro del area de pesado, se usan dos galgas para medir y calcular su peso
+ * Luego de hecho el calculo, se envia el peso y la velocidad maxima del vehiculo al operador por medio de UART
+ * Ese mismo operador puede enviar comandos por medio de letras en el teclado para abrir o cerrar la barrera para que los vehiculos pasen
  *
  * @section hardConn Hardware Connection
  *
  * |    Peripheral  |   ESP32   	|
  * |:--------------:|:--------------|
- * | 	PIN_X	 	| 	GPIO_X		|
+ * | 	Galga1		| 	GPIO_0		|	
+ * |	Galga2  	| 	GPIO_1		|
+ * | 	ECHO	 	| 	GPIO_3		|
+ * | 	TRIGGER	 	| 	GPIO_		|
+ * | 	Barrera	 	| 	GPIO_20		|
+ * | 	 +3,3V	 	| 	 +3,3V		|
+ * | 	GND	 	| 	GND		|
  *
  *
  * @section changelog Changelog
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 12/09/2023 | Document creation		                         |
+ * | 11/11/2024 | Document creation		                         |
  *
- * @author Albano Peñalva (albano.penalva@uner.edu.ar)
+ * @author Tomás Rios (tomitotorios@gmail.com)
  *
  */
 
@@ -396,7 +404,7 @@ void app_main(void){
 
 
 		timer_config_t timer_PesarTask = {
-        .timer = TIMER_A,
+        .timer = TIMER_B,
         .period = PESAR_DELAY,
         .func_p = FuncTimerB,
         .param_p = NULL
@@ -422,5 +430,6 @@ void app_main(void){
 	//inicialización del conteo de los timers
 	printf("timer start\n");
 	TimerStart(timer_MedirTask.timer);
+	TimerStart(timer_PesarTask.timer);
 }
 /*==================[end of file]============================================*/
